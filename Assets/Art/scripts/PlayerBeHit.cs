@@ -38,17 +38,23 @@ public class PlayerBeHit : MonoBehaviour
         {
             flashColor.Flash(0.1f);
         }
-
-        if (audioSource)
+        //角色受击音效
+        if (AudioManager.Instance != null)
         {
-            audioSource.Play();
+            AudioManager.Instance.PlaySFX(0);
         }
 
         hp -= 1;
         RefreshHpUI();
 
+        // 角色死亡
         if (hp <= 0)
         {
+            // 失败
+            if (GameManager.I != null)
+            {
+                GameManager.I.Lose();
+            }
             Destroy(gameObject);
         }
     }

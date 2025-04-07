@@ -11,6 +11,12 @@ public class ExplodeSkill : MonoBehaviour
     // 爆炸技能原理——先激活碰撞体，等1帧物理帧，再关闭碰撞体即可
     IEnumerator Start()
     {
+        // 播放爆炸特效音
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX(2);  
+        }
+
         Destroy(gameObject, 1.0f);      // 过1秒销毁自身
 
         coll = GetComponent<Collider2D>();

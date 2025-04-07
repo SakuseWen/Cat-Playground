@@ -61,9 +61,9 @@ public class LevelUp : MonoBehaviour
 
             Text text3 = levelUpPanel.transform.GetChild(2).GetChild(0).GetComponent<Text>();
 
-            text1.text = player.leftSkill.skillName + $" {player.leftSkill.skillLevel + 1}级";
-            text2.text = player.rightSkill.skillName + $" {player.rightSkill.skillLevel + 1}级";
-            text3.text = "生命上限+1";
+            text1.text = player.leftSkill.skillName + $" {player.leftSkill.skillLevel + 1}level";
+            text2.text = player.rightSkill.skillName + $" {player.rightSkill.skillLevel + 1}level";
+            text3.text = "Life limit +1";
 
             levelUpPanel.SetActive(true);
             Time.timeScale = 0;

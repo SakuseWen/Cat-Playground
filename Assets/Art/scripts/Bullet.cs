@@ -13,7 +13,11 @@ public class Bullet : MonoBehaviour
     void Start()
     {
         rigid = GetComponent<Rigidbody2D>();
-        
+        // 播放射击特效音
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySFX(1);
+        }
     }
 
     private void Update()

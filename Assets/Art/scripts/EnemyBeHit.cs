@@ -48,6 +48,11 @@ public class EnemyBeHit : MonoBehaviour
         hp -= damage;       // 实际掉血
         if (hp <= 0)        // 如果hp<=0则死亡，销毁自身，掉落宝石
         {
+            // 敌人死亡前通知GameManager
+            if (GameManager.I != null)
+            {
+                GameManager.I.EnemyKilled();
+            }
             Destroy(gameObject);
             if (prefabGem)
             {
