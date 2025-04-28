@@ -191,7 +191,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25480707668f0954289dc94d929c9dd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
+  speed: 1.5
+  player: {fileID: 0}
 --- !u!114 &9191064635972525698
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,7 +205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ba1b1dd482613a48a3b56e73a36587c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 5
+  hp: 10
   prefabHeadNum: {fileID: 4096400090922833092, guid: e300ab2b9afeea24182b013a13bd6baa, type: 3}
   prefabGem: {fileID: 5143082455941711651, guid: bfa4c2ee2b405004b8880b257202ba19, type: 3}
 --- !u!114 &6777193338437675937

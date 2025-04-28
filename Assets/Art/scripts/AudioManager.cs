@@ -5,9 +5,9 @@ public class AudioManager : MonoBehaviour
     public static AudioManager Instance { get; private set; }
 
     [Header("BGM Sources (children)")]
-    [SerializeField] private AudioSource[] bgmSources;   // BGM1‑3
+    [SerializeField] private AudioSource[] bgmSources;   // BGM
     [Header("SFX Sources (children)")]
-    [SerializeField] private AudioSource[] sfxSources;   // SFX1‑3
+    [SerializeField] private AudioSource[] sfxSources;   // SFX
 
     private void Awake()
     {
@@ -40,9 +40,20 @@ public class AudioManager : MonoBehaviour
 
     public void PlaySFX(int index)
     {
-        if (!IsValid(index, sfxSources)) return;
-        sfxSources[index].PlayOneShot(sfxSources[index].clip);
+        if (!IsValid(index, sfxSources))
+        {
+            Debug.LogWarning($"[AudioManager] PlaySFX: 索引 {index} 无效或未赋值");
+            return;
+        }
+        var src = sfxSources[index];
+        if (src.clip == null)
+        {
+            Debug.LogWarning($"[AudioManager] SFX[{index}] 的 AudioSource.clip 为空");
+            return;
+        }
+        src.PlayOneShot(src.clip);
     }
+
 
     public void StopAllBGM()
     {

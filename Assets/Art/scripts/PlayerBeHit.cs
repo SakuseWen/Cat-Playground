@@ -1,60 +1,43 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/*******************************************************
+ * PlayerBeHit.cs —— HP / 受击
+ *******************************************************/
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerBeHit : MonoBehaviour
 {
     public int maxHp = 5;
+    [HideInInspector] public Image hpImage;
 
     int hp;
-
-    FlashColor flashColor;
-    AudioSource audioSource;
-
-    public Image hpImage;
+    FlashColor flash;
 
     void Start()
     {
-        flashColor = GetComponent<FlashColor>();
+        flash = GetComponent<FlashColor>();
         hp = maxHp;
+        RefreshHpUI();
     }
 
-    void RefreshHpUI()
+    public void RefreshHpUI()
     {
-        if (hpImage)
-        {
-            hpImage.fillAmount = (float)hp / maxHp;
-        }
+        if (hpImage) hpImage.fillAmount = (float)hp / maxHp;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D col)
     {
-        if (collision.gameObject.layer != LayerMask.NameToLayer("Enemy"))
-        {
-            return;
-        }
-        if (flashColor)
-        {
-            flashColor.Flash(0.1f);
-        }
-        //角色受击音效
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlaySFX(0);
-        }
+        if (col.gameObject.layer != LayerMask.NameToLayer("Enemy")) return;
 
-        hp -= 1;
+        flash?.Flash(0.1f);
+        AudioManager.Instance?.PlaySFX(0);
+
+        hp--;
         RefreshHpUI();
 
-        // 角色死亡
         if (hp <= 0)
         {
-            // 失败
-            if (GameManager.I != null)
-            {
-                GameManager.I.Lose();
-            }
+            GameManager.I?.Lose();
             Destroy(gameObject);
         }
     }
@@ -63,5 +46,17 @@ public class PlayerBeHit : MonoBehaviour
     {
         hp = maxHp;
         RefreshHpUI();
+    }
+
+    internal void TakeDamage()
+    {
+        hp--;
+        RefreshHpUI();
+
+        if (hp <= 0)
+        {
+            GameManager.I?.Lose();
+            Destroy(gameObject);
+        }
     }
 }

@@ -28,6 +28,7 @@ public class Bullet : MonoBehaviour
     // 碰到其它物体销毁自身
     private void OnTriggerEnter2D(Collider2D collision)
     {
+       
         Destroy(gameObject);
     }
 }

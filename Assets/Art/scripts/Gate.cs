@@ -10,6 +10,17 @@ public class Gate : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        collision.gameObject.transform.position = to.position;
+        // 只对带有 "Player" Tag 的物体生效
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            // 播放 SFX Array 中的第 4 个元素（Element?3 → 索引 3）
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(3);
+            }
+
+            // 传送玩家
+            collision.gameObject.transform.position = to.position;
+        }
     }
 }

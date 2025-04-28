@@ -1,117 +1,138 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
+/*******************************************************
+ *  LevelUp.cs ―― 升级 / 经验条 / 升级面板
+ *******************************************************/
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
-// 玩家升级脚本。涉及到较多UI操作
 public class LevelUp : MonoBehaviour
 {
-    public int level = 1;   // 当前等级
-    public int exp = 0;     // 当前经验值
-    public Image expImage;  // 经验条图片
+    [Header("当前等级 / 经验")]
+    public int level = 1;
+    public int exp = 0;
 
+    [Header("UI 引用 (运行时重绑)")]
+    public Image expImage;
     public GameObject levelUpPanel;
 
     Player player;
 
-    private void Start()
+    /* ---------------- 生命周期 ---------------- */
+    void Awake()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        if (levelUpPanel == null)
+        {
+            Canvas cvs = Object.FindFirstObjectByType<Canvas>();
+            if (cvs) levelUpPanel = cvs.transform.Find("LevelUpPanel")?.gameObject;
+        }
+        if (levelUpPanel) levelUpPanel.SetActive(false);
+    }
+    void OnDestroy() => SceneManager.sceneLoaded -= OnSceneLoaded;
+
+    void Start()
     {
         player = GetComponent<Player>();
-
-        if (expImage)
-        {
-            expImage.fillAmount = (float)exp / CalcLevelExp(level);
-        }
-
-        if (levelUpPanel)
-        {
-            levelUpPanel.SetActive(false);
-        }
+        RefreshPanelRef();
+        UpdateExpBar();
     }
 
-    // 当获取到经验宝石时被调用
+    /* ---------------- 场景切换 ---------------- */
+    void OnSceneLoaded(Scene s, LoadSceneMode m) => RefreshPanelRef();
+    void RefreshPanelRef()
+    {
+        if (!levelUpPanel)
+        {
+            Canvas cvs = Object.FindFirstObjectByType<Canvas>();
+            if (cvs) levelUpPanel = cvs.transform.Find("LevelUpPanel")?.gameObject;
+        }
+        if (levelUpPanel) levelUpPanel.SetActive(false);
+    }
+
+    /* ---------------- 获得经验 ---------------- */
     public void OnGetGem(int e)
     {
         exp += e;
-
         int maxExp = CalcLevelExp(level);
+
         if (exp >= maxExp)
         {
             OnLevelUp();
             maxExp = CalcLevelExp(level);
         }
-        if (expImage)
-        {
-            expImage.fillAmount = (float)exp / maxExp;
-        }
+        UpdateExpBar(maxExp);
     }
 
-    public void OnLevelUp()
+    /* ---------------- 升级触发 ---------------- */
+    void OnLevelUp()
     {
-        Debug.Log("升级！");
         level++;
         exp = 0;
 
-        if (levelUpPanel)
-        {
-            Text text1 = levelUpPanel.transform.GetChild(0).GetChild(0).GetComponent<Text>();
+        if (!levelUpPanel) return;
 
-            Text text2 = levelUpPanel.transform.GetChild(1).GetChild(0).GetComponent<Text>();
+        // 刷新三个按钮的文字 & 可点状态
+        UpdateButton(0, player.leftSkill);
+        UpdateButton(1, player.rightSkill);
+        UpdateButton(2, null);                 // HP 始终可点
 
-            Text text3 = levelUpPanel.transform.GetChild(2).GetChild(0).GetComponent<Text>();
-
-            text1.text = player.leftSkill.skillName + $" {player.leftSkill.skillLevel + 1}level";
-            text2.text = player.rightSkill.skillName + $" {player.rightSkill.skillLevel + 1}level";
-            text3.text = "Life limit +1";
-
-            levelUpPanel.SetActive(true);
-            Time.timeScale = 0;
-        }
+        levelUpPanel.SetActive(true);
+        Time.timeScale = 0f;
     }
 
-    public int CalcLevelExp(int level)
+    /* —— 根据技能是否满级刷新按钮 —— */
+    void UpdateButton(int index, SkillDefine sd)
     {
-        return level * 5;
-    }
+        Transform btnTr = levelUpPanel.transform.GetChild(index);
+        Button btn = btnTr.GetComponent<Button>();
+        Text txt = btnTr.GetChild(0).GetComponent<Text>();
 
-    public void OnButton1()
-    {
-        Debug.Log("OnButton1");
-        levelUpPanel.SetActive(false);
-        Time.timeScale = 1;
-
-        if (player.leftSkill.skillLevel >= player.leftSkill.cooldown.Count)
+        if (sd == null)                        // HP 按钮
         {
-            Debug.Log($"技能{player.leftSkill.name}已经满级");
-            return;
-        }
-        player.leftSkill.skillLevel++;
-    }
-
-    public void OnButton2()
-    {
-        Debug.Log("OnButton2");
-        levelUpPanel.SetActive(false);
-        Time.timeScale = 1;
-
-        if (player.rightSkill.skillLevel >= player.rightSkill.cooldown.Count)
-        {
-            Debug.Log($"技能{player.rightSkill.name}已经满级");
+            btn.interactable = true;
+            txt.text = "HP +1";
             return;
         }
 
-        player.rightSkill.skillLevel++;
+        bool isMax = sd.skillLevel >= sd.cooldown.Count;
+        btn.interactable = !isMax;
+        txt.text = isMax ? "MAX" : $"{sd.skillName} {sd.skillLevel + 1}";
     }
 
+    /* ---------------- 经验条刷新 ---------------- */
+    public void UpdateExpBar(int maxExp = -1)
+    {
+        if (!expImage) return;
+        if (maxExp < 0) maxExp = CalcLevelExp(level);
+        expImage.fillAmount = (float)exp / maxExp;
+    }
+    public int CalcLevelExp(int lv) => lv * 5;
+
+    /* ---------------- 面板按钮 ---------------- */
+    public void OnButton1() => TryUpSkill(player.leftSkill);
+    public void OnButton2() => TryUpSkill(player.rightSkill);
     public void OnButton3()
     {
-        Debug.Log("OnButton3");
-        levelUpPanel.SetActive(false);
-        Time.timeScale = 1;
+        HidePanel();
+        var bh = player.GetComponent<PlayerBeHit>();
+        bh.maxHp += 1;
+        bh.HealAllHp();
+    }
 
-        var behit = player.GetComponent<PlayerBeHit>();
-        behit.maxHp += 1;
-        behit.HealAllHp();
+    void TryUpSkill(SkillDefine sd)
+    {
+        // 已经 MAX → 无动作
+        if (sd.skillLevel >= sd.cooldown.Count) return;
+
+        sd.skillLevel++;
+        sd.Remember();                 // 保存到缓存
+        HidePanel();
+    }
+
+    public void HidePanel()
+    {
+        if (levelUpPanel) levelUpPanel.SetActive(false);
+        Time.timeScale = 1f;
     }
 }

@@ -14,9 +14,9 @@ public class Enemy : MonoBehaviour
     Vector2 move;
     public float speed = 3;
 
-    Transform player;
+   public Transform player;
 
-    void Start()
+    public void Start()
     {
         rigid = GetComponent<Rigidbody2D>();
         sprite = GetComponent<SpriteRenderer>();
@@ -26,7 +26,7 @@ public class Enemy : MonoBehaviour
     }
 
 
-    void Update()
+  public  void Update()
     {
         if (!player)
         {
